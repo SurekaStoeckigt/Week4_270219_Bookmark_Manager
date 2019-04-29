@@ -1,12 +1,7 @@
-<ul>
-  <% @bookmarks.each do |bookmark| %>
-    <li>
-      <a href="<%= bookmark.url %>">,
-        <%= bookmark.title %>
-      </a>
-    </li>
-  <% end %>
-</ul>
+<% @bookmarks.each do | bookmark | %>
+  <a href="<%= bookmark.url %>"> <%= bookmark.title %> </a>
+  <br/>
+<% end %>
 
 <!-- bookmark added
 http://www.bbc.co.uk -->

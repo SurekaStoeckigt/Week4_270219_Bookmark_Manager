@@ -1,36 +1,45 @@
-require 'pg'
+require "pg"
 
 class Bookmark
-attr_reader :id, :title, :url
-
- def initialize(id:, title:, url: )
-   @id = id
-   @title = title
-   @url = url
- end
+  attr_reader :url, :title, :id, :bookmarks
 
   def self.all
+    @bookmarks = Array.new
+
     if ENV['ENVIRONMENT'] == 'test'
-      connection = PG.connect(dbname: 'bookmark_manager_test')
+      marks = PG.connect( dbname: 'bookmark_manager_test')
     else
-      connection = PG.connect(dbname: 'bookmark_manager')
+      marks = PG.connect( dbname: 'bookmark_manager')
     end
-    result = connection.exec("SELECT * FROM bookmarks;")
-    result.map do |bookmark|
-    Bookmark.new(id: bookmark['id'], title: bookmark['title'], url: bookmark['url'])
+    marks.exec("SELECT * FROM bookmarks;").each do | bookmark |
+      @bookmarks << Bookmark.new(bookmark["url"], bookmark["title"], bookmark["id"])
     end
+    p @bookmarks
+    @bookmarks
   end
 
-  def self.create(url:, title:)
-    # return false unless is_url?(url)
+  def self.create(link, title)
     if ENV['ENVIRONMENT'] == 'test'
-      connection = PG.connect(dbname: 'bookmark_manager_test')
+      marks = PG.connect( dbname: 'bookmark_manager_test')
     else
-      onnection = PG.connect(dbname: 'bookmark_manager')
+      marks = PG.connect( dbname: 'bookmark_manager')
     end
-    result = connection.exec("INSERT INTO bookmarks (url, title) VALUES('#{url}', '#{title}') RETURNING id, title, url;")
-    Bookmark.new(id: result[0]['id'], title: result[0]['title'], url: result[0]['url'])
+    marks.exec("INSERT INTO bookmarks (url, title) VALUES ('#{link}', '#{title}');")
   end
 
+  def self.delete(id)
+    if ENV['ENVIRONMENT'] == 'test'
+      marks = PG.connect( dbname: 'bookmark_manager_test')
+    else
+      marks = PG.connect( dbname: 'bookmark_manager')
+    end
+    marks.exec("DELETE FROM bookmarks WHERE id = #{id};")
 
+  end
+
+  def initialize(url, title, id)
+    @url = url
+    @title = title
+    @id = id
+  end
 end
